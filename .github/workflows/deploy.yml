@@ -24,23 +24,13 @@ jobs:
     - name: Build
       run: npm run build
       
-    - name: Setup Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-        
-    - name: Install Tencent Cloud CLI
-      run: |
-        pip install tccli
-        tccli configure set secretId ${{ secrets.TENCENT_SECRET_ID }}
-        tccli configure set secretKey ${{ secrets.TENCENT_SECRET_KEY }}
-        tccli configure set region ${{ secrets.COS_REGION }}
-        
     - name: Deploy to COS
-      run: |
-        tccli cos upload-r \
-          --Bucket ${{ secrets.COS_BUCKET }} \
-          --Region ${{ secrets.COS_REGION }} \
-          --LocalPath ./dist \
-          --CosPath / \
-          --Recursive
+      uses: wangchucheng/cos-deploy@v1
+      with:
+        secret_id: ${{ secrets.TENCENT_SECRET_ID }}
+        secret_key: ${{ secrets.TENCENT_SECRET_KEY }}
+        bucket: ${{ secrets.COS_BUCKET }}
+        region: ${{ secrets.COS_REGION }}
+        local_path: dist
+        remote_path: /
+        clean: true
