@@ -1,36 +1,32 @@
-name: Deploy to Tencent Cloud COS
+name: Deploy to Tencent COS
 
 on:
   push:
     branches: [ main ]
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
-    
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+      - uses: actions/checkout@v4
       
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
-        
-    - name: Install dependencies
-      run: npm ci
-      
-    - name: Build
-      run: npm run build
-      
-    - name: Deploy to COS
-      uses: wangchucheng/cos-deploy@v1
-      with:
-        secret_id: ${{ secrets.TENCENT_SECRET_ID }}
-        secret_key: ${{ secrets.TENCENT_SECRET_KEY }}
-        bucket: ${{ secrets.COS_BUCKET }}
-        region: ${{ secrets.COS_REGION }}
-        local_path: dist
-        remote_path: /
-        clean: true
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: Install & Build
+        run: |
+          npm ci
+          npm run build
+          
+      - name: Deploy to COS
+        uses: TencentCloud/cos-action@v1
+        with:
+          secret_id: ${{ secrets.TENCENT_SECRET_ID }}
+          secret_key: ${{ secrets.TENCENT_SECRET_KEY }}
+          cos_bucket: ${{ secrets.COS_BUCKET }}
+          cos_region: ${{ secrets.COS_REGION }}
+          local_path: dist
+          remote_path: /
+          clean: true
