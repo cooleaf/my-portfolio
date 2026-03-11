@@ -1,4 +1,4 @@
-name: Deploy to Tencent COS
+name: Deploy to Tencent CVM
 
 on:
   push:
@@ -20,16 +20,13 @@ jobs:
           npm ci
           npm run build
           
-      - name: Install coscmd
-        run: pip install coscmd
-        
-      - name: Configure coscmd
-        run: |
-          coscmd config \
-            -a ${{ secrets.TENCENT_SECRET_ID }} \
-            -s ${{ secrets.TENCENT_SECRET_KEY }} \
-            -b ${{ secrets.COS_BUCKET }} \
-            -r ${{ secrets.COS_REGION }}
-          
-      - name: Deploy to COS
-        run: coscmd upload -rfs --delete ./dist /
+      - name: Deploy to CVM via SSH
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.CVM_HOST }}
+          username: ${{ secrets.CVM_USER }}
+          password: ${{ secrets.CVM_PASSWORD }}
+          port: 22
+          source: "./dist/"
+          target: "/usr/share/nginx/html/"
+          strip_components: 1
